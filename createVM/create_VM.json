@@ -1,0 +1,70 @@
+{
+  "builders": [{
+    "name": "VM-packer",
+    "vm_name": "vmCcreatedWithPacker",
+    "type": "vmware-iso",
+    "guest_os_type": "ubuntu-64",
+    "tools_upload_flavor": "linux",
+    "headless": false,
+
+    "iso_url": "ubuntu-16.04.2-server-amd64.iso",
+
+    "iso_checksum": "2bce60d18248df9980612619ff0b34e6",
+    "iso_checksum_type": "sha256",
+
+    "ssh_username": "biarca",
+    "ssh_password": "biarca@123",
+
+    "disk_type_id": "thin",
+    "ssh_timeout": "15m",
+
+    "shutdown_command": "echo 'shutdown -P now' > shutdown.sh; echo 'biarca@123'|sudo -S sh 'shutdown.sh'",
+
+
+    "floppy_files": [
+      "preseed.cfg"
+    ],
+
+    "boot_command": [
+      "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "/install/vmlinuz noapic ",
+      "preseed/file=/floppy/preseed.cfg ",
+      "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+      "hostname={{ .Name }} ",
+      "fb=false debconf/frontend=noninteractive ",
+      "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+      "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+      "grub-installer/bootdev=/dev/sda ",
+      "initrd=/install/initrd.gz -- <enter>"
+    ],
+
+
+    "remote_type": "esx5",
+    "remote_host": "{{user `esxi_host`}}",
+    "remote_datastore": "{{user `esxi_datastore`}}",
+    "remote_username": "{{user `esxi_username`}}",
+    "remote_password": "{{user `esxi_password`}}",
+    "keep_registered": true,
+    "format":"ovf",
+
+    "vmx_data": {
+      "ethernet0.networkName": "VM Network"
+    }
+  }],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "scripts": [
+        "./open-vm-tools.sh"
+      ],
+
+      "execute_command": "echo 'biarca123' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'"
+    }
+  ]
+
+
+}
